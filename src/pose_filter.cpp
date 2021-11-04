@@ -32,12 +32,12 @@ public:
   ArucoFilterPose(const std::string node_name, rclcpp::NodeOptions options)
   : Node(node_name, options)
   {
-    aruco_pose_raw_topic_ = this->declare_parameter("subscribers.aruco_pose_raw_measures", "/target_tracking/camera_to_marker_transform/marker_0");
+    aruco_pose_raw_topic_ = this->declare_parameter("subscribers.aruco_pose_raw_measures", "/target_tracking/camera_to_marker_transform/marker_10");
     wrist_camera_link_frame_ = this->declare_parameter("frames.wrist_camera", "wrist_camera_link");
     
     link_base__T__wrist_camera_link = Eigen::Matrix4d::Identity();
 
-    aruco_pose_filter_topic_ = this->declare_parameter("publishers.aruco_pose_filter_measures", "/target_tracking/camera_to_marker_transform/filter/marker_0");
+    aruco_pose_filter_topic_ = this->declare_parameter("publishers.aruco_pose_filter_measures", "/target_tracking/camera_to_marker_transform/marker_10/filter");
 
     aruco_pose_filter_pub_ = this->create_publisher<TransformStamped>(aruco_pose_filter_topic_, 1);
 

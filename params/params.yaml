@@ -12,7 +12,7 @@ pose_filter:
       n_samples: 30
 
     publishers:
-      aruco_pose_filter_measures: /target_tracking/camera_to_marker_transform/filter/marker_10
+      aruco_pose_filter_measures: /target_tracking/camera_to_marker_transform/marker_10/filter
 
     subscribers:
       aruco_pose_raw_measures: /target_tracking/camera_to_marker_transform/marker_10

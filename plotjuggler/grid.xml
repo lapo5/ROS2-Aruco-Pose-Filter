@@ -1,0 +1,116 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<root version="2.3.8">
+ <tabbed_widget name="Main Window" parent="main_window">
+  <Tab tab_name="tab1" containers="1">
+   <Container>
+    <DockSplitter count="1" orientation="-" sizes="1">
+     <DockSplitter count="2" orientation="|" sizes="0.5;0.5">
+      <DockSplitter count="3" orientation="-" sizes="0.333709;0.332582;0.333709">
+       <DockArea name="...">
+        <plot style="Lines" mode="TimeSeries">
+         <range top="-0.593896" right="135.168499" bottom="-0.794746" left="0.000000"/>
+         <limitY/>
+         <curve name="/target_tracking/camera_to_marker_transform/filter/marker_0/transform/translation/x" color="#f14cc1"/>
+         <curve name="/target_tracking/camera_to_marker_transform/marker_0/transform/translation/x" color="#ff7f0e"/>
+        </plot>
+       </DockArea>
+       <DockArea name="...">
+        <plot style="Lines" mode="TimeSeries">
+         <range top="-0.369840" right="135.168499" bottom="-0.625560" left="0.000000"/>
+         <limitY/>
+         <curve name="/target_tracking/camera_to_marker_transform/filter/marker_0/transform/translation/y" color="#9467bd"/>
+         <curve name="/target_tracking/camera_to_marker_transform/marker_0/transform/translation/y" color="#f14cc1"/>
+        </plot>
+       </DockArea>
+       <DockArea name="...">
+        <plot style="Lines" mode="TimeSeries">
+         <range top="7.131524" right="135.168499" bottom="5.061973" left="0.000000"/>
+         <limitY/>
+         <curve name="/target_tracking/camera_to_marker_transform/filter/marker_0/transform/translation/z" color="#17becf"/>
+         <curve name="/target_tracking/camera_to_marker_transform/marker_0/transform/translation/z" color="#9467bd"/>
+        </plot>
+       </DockArea>
+      </DockSplitter>
+      <DockSplitter count="4" orientation="-" sizes="0.250564;0.249436;0.250564;0.249436">
+       <DockArea name="...">
+        <plot style="Lines" mode="TimeSeries">
+         <range top="1.000000" right="135.201658" bottom="-1.000000" left="0.000000"/>
+         <limitY max="1" min="-1"/>
+         <curve name="/target_tracking/camera_to_marker_transform/filter/marker_0/transform/rotation/x" color="#1f77b4"/>
+         <curve name="/target_tracking/camera_to_marker_transform/marker_0/transform/rotation/x" color="#bcbd22"/>
+         <curve name="/target_tracking/camera_to_marker_transform/marker_10/transform/rotation/w" color="#17becf"/>
+         <curve name="/target_tracking/camera_to_marker_transform/marker_10/transform/rotation/x" color="#bcbd22"/>
+        </plot>
+       </DockArea>
+       <DockArea name="...">
+        <plot style="Lines" mode="TimeSeries">
+         <range top="1.000000" right="135.201658" bottom="-1.000000" left="0.000000"/>
+         <limitY max="1" min="-1"/>
+         <curve name="/target_tracking/camera_to_marker_transform/filter/marker_0/transform/rotation/y" color="#d62728"/>
+         <curve name="/target_tracking/camera_to_marker_transform/marker_0/transform/rotation/y" color="#1f77b4"/>
+         <curve name="/target_tracking/camera_to_marker_transform/marker_10/transform/rotation/y" color="#1f77b4"/>
+        </plot>
+       </DockArea>
+       <DockArea name="...">
+        <plot style="Lines" mode="TimeSeries">
+         <range top="1.000000" right="135.201658" bottom="-1.000000" left="0.000000"/>
+         <limitY max="1" min="-1"/>
+         <curve name="/target_tracking/camera_to_marker_transform/filter/marker_0/transform/rotation/z" color="#1ac938"/>
+         <curve name="/target_tracking/camera_to_marker_transform/marker_0/transform/rotation/z" color="#d62728"/>
+         <curve name="/target_tracking/camera_to_marker_transform/marker_10/transform/rotation/z" color="#d62728"/>
+        </plot>
+       </DockArea>
+       <DockArea name="...">
+        <plot style="Lines" mode="TimeSeries">
+         <range top="1.000000" right="135.201658" bottom="-1.000000" left="0.000000"/>
+         <limitY max="1" min="-1"/>
+         <curve name="/target_tracking/camera_to_marker_transform/filter/marker_0/transform/rotation/w" color="#ff7f0e"/>
+         <curve name="/target_tracking/camera_to_marker_transform/marker_0/transform/rotation/w" color="#1ac938"/>
+         <curve name="/target_tracking/camera_to_marker_transform/marker_10/transform/rotation/w" color="#17becf"/>
+        </plot>
+       </DockArea>
+      </DockSplitter>
+     </DockSplitter>
+    </DockSplitter>
+   </Container>
+  </Tab>
+  <currentTabIndex index="0"/>
+ </tabbed_widget>
+ <use_relative_time_offset enabled="1"/>
+ <!-- - - - - - - - - - - - - - - -->
+ <!-- - - - - - - - - - - - - - - -->
+ <Plugins>
+  <plugin ID="DataLoad CSV">
+   <default time_axis=""/>
+  </plugin>
+  <plugin ID="DataLoad ROS2 bags">
+   <use_header_stamp value="false"/>
+   <discard_large_arrays value="true"/>
+   <max_array_size value="100"/>
+  </plugin>
+  <plugin ID="DataLoad ULog"/>
+  <plugin ID="ROS2 Topic Subscriber">
+   <use_header_stamp value="false"/>
+   <discard_large_arrays value="false"/>
+   <max_array_size value="true"/>
+   <selected_topics>
+    <topic name="/target_tracking/camera_to_marker_transform/marker_0"/>
+    <topic name="/target_tracking/camera_to_marker_transform/filter/marker_0"/>
+    <topic name="/target_tracking/camera_to_marker_transform/marker_10"/>
+   </selected_topics>
+  </plugin>
+  <plugin ID="UDP Server"/>
+  <plugin ID="WebSocket Server"/>
+  <plugin ID="ZMQ Subscriber"/>
+  <plugin status="idle" ID="CSV Exporter"/>
+  <plugin status="idle" ID="ROS2 Topic Re-Publisher"/>
+ </Plugins>
+ <!-- - - - - - - - - - - - - - - -->
+ <previouslyLoaded_Datafiles/>
+ <previouslyLoaded_Streamer name="ROS2 Topic Subscriber"/>
+ <!-- - - - - - - - - - - - - - - -->
+ <customMathEquations/>
+ <snippets/>
+ <!-- - - - - - - - - - - - - - - -->
+</root>
+

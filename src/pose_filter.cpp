@@ -15,6 +15,7 @@
 
 #include <tf2_ros/transform_broadcaster.h>
 #include <geometry_msgs/msg/wrench_stamped.hpp>
+#include <std_msgs/msg/bool.hpp>
 
 #include "Iir.h"
 
@@ -33,7 +34,11 @@ public:
   : Node(node_name, options)
   {
     aruco_pose_raw_topic_ = this->declare_parameter("subscribers.aruco_pose_raw_measures", "/target_tracking/camera_to_marker_transform/marker_10");
-    wrist_camera_link_frame_ = this->declare_parameter("frames.wrist_camera", "wrist_camera_link");
+    aruco_presence_topic_ = this->declare_parameter("subscribers.aruco_presence", "/target_tracking/camera_to_marker_presence/marker_10");
+
+    camera_link_frame = this->declare_parameter("frames.camera", "wrist_camera_link");
+
+    stable_link_frame_ = this->declare_parameter("frames.stable_link", "stable_link_10");
     
     link_base__T__wrist_camera_link = Eigen::Matrix4d::Identity();
 
@@ -59,6 +64,13 @@ public:
     
     use_median = this->declare_parameter<bool>("median_filter.use_median", true);
 
+    std::cout << "use_median: " << use_median << std::endl;
+    if(use_median)
+      start_publishing = false;
+    else
+      start_publishing = true;
+    publish = false;
+
 
     float sampling_rate = this->declare_parameter<float>("butterworth_filter.sampling_rate", 10.0);
     float cutoff_frequency = this->declare_parameter<float>("butterworth_filter.cutoff_frequency", 1.0);
@@ -69,10 +81,18 @@ public:
 
     aruco_pose_raw_sub_ = this->create_subscription<TransformStamped>(aruco_pose_raw_topic_, 1, 
         std::bind(&ArucoFilterPose::aruco_pose_raw_callback, this, std::placeholders::_1));
+      
 
-    hz_filter = this->declare_parameter<double>("filter_rate", 10.0);
-    filter_publisher_timer_ = this->create_wall_timer(1000ms / hz_filter, 
-      std::bind(&ArucoFilterPose::publish_filtering, this));
+    aruco_presence_sub_ = this->create_subscription<std_msgs::msg::Bool>(aruco_presence_topic_, 1, 
+        std::bind(&ArucoFilterPose::aruco_presence_callback, this, std::placeholders::_1));
+
+    if(use_median){
+      hz_filter = this->declare_parameter<double>("filter_rate", 10.0);
+      filter_publisher_timer_ = this->create_wall_timer(1000ms / hz_filter, 
+        std::bind(&ArucoFilterPose::publish_filtering, this));
+    }
+    
+    std::cout << "Aruco Pose Filter Start" << std::endl;
   }
 
 private:
@@ -90,12 +110,17 @@ private:
       last_N_measures_rz[counter] = msg->transform.rotation.z;
       last_N_measures_rw[counter] = msg->transform.rotation.w;
       counter = (counter + 1) % N_measures;
+
+      if (counter == 0)
+      {
+        start_publishing = true;
+      }
     }
-    else{
+    else if(publish){
       TransformStamped filtered_pose;
       filtered_pose.header.stamp = this->get_clock()->now();
-      filtered_pose.header.frame_id = wrist_camera_link_frame_;
-      filtered_pose.child_frame_id = "link_stabile";
+      filtered_pose.header.frame_id = camera_link_frame;
+      filtered_pose.child_frame_id = stable_link_frame_;
 
       filtered_pose.transform.translation.x = (float) filters[0].filter(msg->transform.translation.x);
       filtered_pose.transform.translation.y = (float) filters[1].filter(msg->transform.translation.y);
@@ -110,13 +135,23 @@ private:
     }
   }
 
+  void aruco_presence_callback(const std_msgs::msg::Bool::SharedPtr msg) {
+
+      if(msg->data == true)
+      {
+        this->publish = true;
+      }
+      else
+        this->publish = false;
+  }
+
 
   void publish_filtering(){
-    if(use_median){
+    if(use_median and start_publishing and publish){
       TransformStamped filtered_pose;
       filtered_pose.header.stamp = this->get_clock()->now();
-      filtered_pose.header.frame_id = wrist_camera_link_frame_;
-      filtered_pose.child_frame_id = "link_stabile";
+      filtered_pose.header.frame_id = camera_link_frame;
+      filtered_pose.child_frame_id = stable_link_frame_;
 
       auto m = last_N_measures_x.begin() + last_N_measures_x.size()/2;
       std::nth_element(last_N_measures_x.begin(), m, last_N_measures_x.end());
@@ -141,6 +176,7 @@ private:
       filtered_pose.transform.rotation.w = (float) filters[6].filter(last_N_measures_rw[last_N_measures_rw.size()/2]);
     
       aruco_pose_filter_pub_->publish(filtered_pose);
+
       tf_broadcaster_->sendTransform(filtered_pose);
     }
     
@@ -151,9 +187,11 @@ private:
     
 
   std::string aruco_pose_raw_topic_;
+  std::string aruco_presence_topic_;
   std::string aruco_pose_filter_topic_;
-  std::string wrist_camera_link_frame_ = "wrist_camera_link";
+  std::string camera_link_frame = "wrist_camera_link";
   std::string base_link_frame_ = "link_base";
+  std::string stable_link_frame_ = "stable_link";
 
   Eigen::Matrix4d link_base__T__wrist_camera_link;
 
@@ -163,6 +201,7 @@ private:
 
   rclcpp::Publisher<TransformStamped>::SharedPtr aruco_pose_filter_pub_{nullptr};
   rclcpp::Subscription<TransformStamped>::SharedPtr aruco_pose_raw_sub_{nullptr};
+  rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr aruco_presence_sub_{nullptr};
 
   std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
 
@@ -184,6 +223,9 @@ private:
   double hz_filter;
 
   bool use_median;
+
+  bool start_publishing;
+  bool publish;
 
   static const int order = 3;
 

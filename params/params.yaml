@@ -16,8 +16,10 @@ pose_filter:
 
     subscribers:
       aruco_pose_raw_measures: /target_tracking/camera_to_marker_transform/marker_10
+      aruco_presence: /target_tracking/camera_to_marker_presence/marker_10
 
     frames: 
-      wrist_camera: wrist_camera_link
+      camera: wrist_camera_link
+      stable_link: marker_10_stable
 
 

@@ -18,6 +18,7 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(std_srvs REQUIRED)
+find_package(std_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(tf2_ros REQUIRED)
@@ -34,6 +35,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   tf2_ros
   Eigen3
   std_srvs
+  std_msgs
 )
 
 add_executable(pose_filter src/pose_filter.cpp)

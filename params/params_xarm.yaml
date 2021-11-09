@@ -1,0 +1,25 @@
+pose_filter:
+  ros__parameters:
+
+    filter_rate: 30.0
+    
+    butterworth_filter:
+      sampling_rate: 10.0
+      cutoff_frequency: 1.0
+
+    median_filter:
+      use_median: True
+      n_samples: 30
+
+    publishers:
+      aruco_pose_filter_measures: /target_tracking/camera_to_marker_transform/marker_69/filter
+
+    subscribers:
+      aruco_pose_raw_measures: /target_tracking/camera_to_marker_transform/marker_69
+      aruco_presence: /target_tracking/camera_to_marker_presence/marker_69
+
+    frames: 
+      camera: wrist_camera_link
+      stable_link: marker_69_stable
+
+

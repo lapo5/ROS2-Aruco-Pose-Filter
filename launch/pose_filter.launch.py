@@ -31,6 +31,6 @@ def generate_launch_description():
                     "stdout": "screen",
                     "stderr": "screen",
             },
-            parameters=[params],
+            parameters=[params, {'marker_id': '69'}],
         )
 ])

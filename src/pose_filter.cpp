@@ -33,16 +33,25 @@ public:
   ArucoFilterPose(const std::string node_name, rclcpp::NodeOptions options)
   : Node(node_name, options)
   {
-    aruco_pose_raw_topic_ = this->declare_parameter("subscribers.aruco_pose_raw_measures", "/target_tracking/camera_to_marker_transform/marker_10");
-    aruco_presence_topic_ = this->declare_parameter("subscribers.aruco_presence", "/target_tracking/camera_to_marker_presence/marker_10");
+    aruco_pose_raw_topic_ = this->declare_parameter("subscribers.aruco_pose_raw_measures_prefix", "/target_tracking/camera_to_marker_transform/marker_");
+    aruco_presence_topic_ = this->declare_parameter("subscribers.aruco_presence_prefix", "/target_tracking/camera_to_marker_presence/marker_");
 
     camera_link_frame = this->declare_parameter("frames.camera", "wrist_camera_link");
 
-    stable_link_frame_ = this->declare_parameter("frames.stable_link", "stable_link_10");
+    stable_link_frame_ = this->declare_parameter("frames.stable_link_prefix", "stable_link_");
     
     link_base__T__wrist_camera_link = Eigen::Matrix4d::Identity();
 
-    aruco_pose_filter_topic_ = this->declare_parameter("publishers.aruco_pose_filter_measures", "/target_tracking/camera_to_marker_transform/marker_10/filter");
+    aruco_pose_filter_topic_ = this->declare_parameter("publishers.aruco_pose_filter_measures_prefix:", "/target_tracking/camera_to_marker_transform/filter/marker_");
+
+    marker_id_ = this->declare_parameter("marker_id", "0");
+
+    std::cout << std::endl << "Marker_id: " << marker_id_ << std::endl;
+
+    aruco_pose_raw_topic_.append(marker_id_);
+    aruco_presence_topic_.append(marker_id_);
+    stable_link_frame_.append(marker_id_);
+    aruco_pose_filter_topic_.append(marker_id_);
 
     aruco_pose_filter_pub_ = this->create_publisher<TransformStamped>(aruco_pose_filter_topic_, 1);
 
@@ -192,6 +201,7 @@ private:
   std::string camera_link_frame = "wrist_camera_link";
   std::string base_link_frame_ = "link_base";
   std::string stable_link_frame_ = "stable_link";
+  std::string marker_id_ = "0";
 
   Eigen::Matrix4d link_base__T__wrist_camera_link;
 

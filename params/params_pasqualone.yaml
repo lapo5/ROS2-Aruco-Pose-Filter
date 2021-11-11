@@ -12,14 +12,14 @@ pose_filter:
       n_samples: 30
 
     publishers:
-      aruco_pose_filter_measures: /target_tracking/camera_to_marker_transform/marker_10/filter
+      aruco_pose_filter_measures_prefix: /target_tracking/camera_to_marker_transform/filter/marker_
 
     subscribers:
-      aruco_pose_raw_measures: /target_tracking/camera_to_marker_transform/marker_10
-      aruco_presence: /target_tracking/camera_to_marker_presence/marker_10
+      aruco_pose_raw_measures_prefix: /target_tracking/camera_to_marker_transform/marker_
+      aruco_presence_prefix: /target_tracking/camera_to_marker_presence/marker_
 
     frames: 
       camera: wrist_camera_link
-      stable_link: marker_10_stable
+      stable_link_prefix: filtered_marker_
 
 

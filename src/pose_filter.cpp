@@ -49,6 +49,7 @@ public:
     std::cout << std::endl << "Marker_id: " << marker_id_ << std::endl;
 
     aruco_pose_raw_topic_.append(marker_id_);
+    std::cout << std::endl << "aruco_pose_raw_topic_: " << aruco_pose_raw_topic_ << std::endl;
     aruco_presence_topic_.append(marker_id_);
     stable_link_frame_.append(marker_id_);
     aruco_pose_filter_topic_.append(marker_id_);

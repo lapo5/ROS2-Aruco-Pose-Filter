@@ -42,7 +42,7 @@ public:
     
     link_base__T__wrist_camera_link = Eigen::Matrix4d::Identity();
 
-    aruco_pose_filter_topic_ = this->declare_parameter("publishers.aruco_pose_filter_measures_prefix:", "/target_tracking/camera_to_marker_transform/filter/marker_");
+    aruco_pose_filter_topic_ = this->declare_parameter("publishers.aruco_pose_filter_measures_prefix", "/target_tracking/camera_to_marker_transform/filter/marker_");
 
     marker_id_ = this->declare_parameter("marker_id", "0");
 

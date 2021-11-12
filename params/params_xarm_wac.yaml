@@ -1,0 +1,25 @@
+pose_filter:
+  ros__parameters:
+
+    filter_rate: 30.0
+    
+    butterworth_filter:
+      sampling_rate: 10.0
+      cutoff_frequency: 1.0
+
+    median_filter:
+      use_median: True
+      n_samples: 30
+
+    publishers:
+      aruco_pose_filter_measures_prefix: /wac/target_tracking/camera_to_marker_transform/filter/marker_
+
+    subscribers:
+      aruco_pose_raw_measures_prefix: /wac/target_tracking/camera_to_marker_transform/marker_
+      aruco_presence_prefix: /wac/target_tracking/camera_to_marker_presence/marker_
+
+    frames: 
+      camera: wac_camera_link
+      stable_link_prefix: wac_filtered_marker_
+
+

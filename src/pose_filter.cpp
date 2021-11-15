@@ -42,7 +42,7 @@ public:
     pose_filter_topic_ = this->declare_parameter("publishers.aruco_pose_filter_measures_prefix", "/target_tracking/camera_to_marker_transform/filter/marker_");
 
     marker_id_ = this->declare_parameter("marker_id", "0");
-    std::cout << std::endl << "Marker_id: " << marker_id_ << std::endl;
+    std::cout << "[Aruco Pose Filter] Marker_id: " << marker_id_ << std::endl;
 
     pose_raw_topic_.append(marker_id_);
     pose_presence_topic_.append(marker_id_);

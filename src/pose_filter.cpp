@@ -14,7 +14,6 @@
 #include <geometry_msgs/msg/transform_stamped.hpp>
 
 #include <tf2_ros/transform_broadcaster.h>
-#include <geometry_msgs/msg/wrench_stamped.hpp>
 #include <std_msgs/msg/bool.hpp>
 
 #include "Iir.h"
@@ -23,38 +22,34 @@
 
 using namespace std::chrono_literals;
 
-class ArucoFilterPose : public rclcpp::Node {
+class FilterPose : public rclcpp::Node {
 
   using TransformStamped = geometry_msgs::msg::TransformStamped;
-  using WrenchStamped = geometry_msgs::msg::WrenchStamped;
 
 public:
 
-  ArucoFilterPose(const std::string node_name, rclcpp::NodeOptions options)
+  FilterPose(const std::string node_name, rclcpp::NodeOptions options)
   : Node(node_name, options)
   {
-    aruco_pose_raw_topic_ = this->declare_parameter("subscribers.aruco_pose_raw_measures_prefix", "/target_tracking/camera_to_marker_transform/marker_");
-    aruco_presence_topic_ = this->declare_parameter("subscribers.aruco_presence_prefix", "/target_tracking/camera_to_marker_presence/marker_");
+    pose_raw_topic_ = this->declare_parameter("subscribers.aruco_pose_raw_measures_prefix", "/target_tracking/camera_to_marker_transform/marker_");
+    pose_presence_topic_ = this->declare_parameter("subscribers.aruco_presence_prefix", "/target_tracking/camera_to_marker_presence/marker_");
 
     camera_link_frame = this->declare_parameter("frames.camera", "wrist_camera_link");
-
     stable_link_frame_ = this->declare_parameter("frames.stable_link_prefix", "stable_link_");
     
     link_base__T__wrist_camera_link = Eigen::Matrix4d::Identity();
 
-    aruco_pose_filter_topic_ = this->declare_parameter("publishers.aruco_pose_filter_measures_prefix", "/target_tracking/camera_to_marker_transform/filter/marker_");
+    pose_filter_topic_ = this->declare_parameter("publishers.aruco_pose_filter_measures_prefix", "/target_tracking/camera_to_marker_transform/filter/marker_");
 
     marker_id_ = this->declare_parameter("marker_id", "0");
-
     std::cout << std::endl << "Marker_id: " << marker_id_ << std::endl;
 
-    aruco_pose_raw_topic_.append(marker_id_);
-    std::cout << std::endl << "aruco_pose_raw_topic_: " << aruco_pose_raw_topic_ << std::endl;
-    aruco_presence_topic_.append(marker_id_);
+    pose_raw_topic_.append(marker_id_);
+    pose_presence_topic_.append(marker_id_);
     stable_link_frame_.append(marker_id_);
-    aruco_pose_filter_topic_.append(marker_id_);
+    pose_filter_topic_.append(marker_id_);
 
-    aruco_pose_filter_pub_ = this->create_publisher<TransformStamped>(aruco_pose_filter_topic_, 1);
+    pose_filter_pub_ = this->create_publisher<TransformStamped>(pose_filter_topic_, 1);
 
     N_measures = this->declare_parameter<int>("median_filter.n_samples", 10);
 
@@ -74,13 +69,12 @@ public:
     
     use_median = this->declare_parameter<bool>("median_filter.use_median", true);
 
-    std::cout << "use_median: " << use_median << std::endl;
     if(use_median)
       start_publishing = false;
     else
       start_publishing = true;
-    publish = false;
 
+    publish = false;
 
     float sampling_rate = this->declare_parameter<float>("butterworth_filter.sampling_rate", 10.0);
     float cutoff_frequency = this->declare_parameter<float>("butterworth_filter.cutoff_frequency", 1.0);
@@ -89,26 +83,26 @@ public:
       filter.setup(order, sampling_rate, cutoff_frequency);
     } 
 
-    aruco_pose_raw_sub_ = this->create_subscription<TransformStamped>(aruco_pose_raw_topic_, 1, 
-        std::bind(&ArucoFilterPose::aruco_pose_raw_callback, this, std::placeholders::_1));
+    pose_raw_sub_ = this->create_subscription<TransformStamped>(pose_raw_topic_, 1, 
+        std::bind(&FilterPose::pose_raw_callback_, this, std::placeholders::_1));
       
 
-    aruco_presence_sub_ = this->create_subscription<std_msgs::msg::Bool>(aruco_presence_topic_, 1, 
-        std::bind(&ArucoFilterPose::aruco_presence_callback, this, std::placeholders::_1));
+    presence_sub_ = this->create_subscription<std_msgs::msg::Bool>(pose_presence_topic_, 1, 
+        std::bind(&FilterPose::pose_presence_callback_, this, std::placeholders::_1));
 
     if(use_median){
       hz_filter = this->declare_parameter<double>("filter_rate", 10.0);
       filter_publisher_timer_ = this->create_wall_timer(1000ms / hz_filter, 
-        std::bind(&ArucoFilterPose::publish_filtering, this));
+        std::bind(&FilterPose::publish_filtering, this));
     }
     
-    std::cout << "Aruco Pose Filter Start" << std::endl;
+    std::cout << "Pose Filter Start" << std::endl;
   }
 
 private:
 
 
-  void aruco_pose_raw_callback(const geometry_msgs::msg::TransformStamped::SharedPtr msg) {
+  void pose_raw_callback_(const geometry_msgs::msg::TransformStamped::SharedPtr msg) {
 
     if (use_median)
     {
@@ -139,13 +133,13 @@ private:
       filtered_pose.transform.rotation.y = (float) filters[4].filter(msg->transform.rotation.y);
       filtered_pose.transform.rotation.z = (float) filters[5].filter(msg->transform.rotation.z);
       filtered_pose.transform.rotation.w = (float) filters[6].filter(msg->transform.rotation.w);
-      aruco_pose_filter_pub_->publish(filtered_pose);
+      pose_filter_pub_->publish(filtered_pose);
 
       tf_broadcaster_->sendTransform(filtered_pose);
     }
   }
 
-  void aruco_presence_callback(const std_msgs::msg::Bool::SharedPtr msg) {
+  void pose_presence_callback_(const std_msgs::msg::Bool::SharedPtr msg) {
 
       if(msg->data == true)
       {
@@ -185,20 +179,16 @@ private:
       std::nth_element(last_N_measures_rw.begin(), m, last_N_measures_rw.end());
       filtered_pose.transform.rotation.w = (float) filters[6].filter(last_N_measures_rw[last_N_measures_rw.size()/2]);
     
-      aruco_pose_filter_pub_->publish(filtered_pose);
+      pose_filter_pub_->publish(filtered_pose);
 
       tf_broadcaster_->sendTransform(filtered_pose);
     }
     
   }
 
-
-
-    
-
-  std::string aruco_pose_raw_topic_;
-  std::string aruco_presence_topic_;
-  std::string aruco_pose_filter_topic_;
+  std::string pose_raw_topic_;
+  std::string pose_presence_topic_;
+  std::string pose_filter_topic_;
   std::string camera_link_frame = "wrist_camera_link";
   std::string base_link_frame_ = "link_base";
   std::string stable_link_frame_ = "stable_link";
@@ -210,16 +200,15 @@ private:
   std::unique_ptr<tf2_ros::Buffer> tf_buffer_{nullptr};
   std::shared_ptr<tf2_ros::TransformListener> transform_listener_{nullptr};
 
-  rclcpp::Publisher<TransformStamped>::SharedPtr aruco_pose_filter_pub_{nullptr};
-  rclcpp::Subscription<TransformStamped>::SharedPtr aruco_pose_raw_sub_{nullptr};
-  rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr aruco_presence_sub_{nullptr};
+  rclcpp::Publisher<TransformStamped>::SharedPtr pose_filter_pub_{nullptr};
+  rclcpp::Subscription<TransformStamped>::SharedPtr pose_raw_sub_{nullptr};
+  rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr presence_sub_{nullptr};
 
   std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
 
   rclcpp::TimerBase::SharedPtr filter_publisher_timer_{nullptr};
   rclcpp::TimerBase::SharedPtr tf_listener_timer_{nullptr};
 
-  std::vector<WrenchStamped> last_N_measures;
   std::vector<double> last_N_measures_x;
   std::vector<double> last_N_measures_y;
   std::vector<double> last_N_measures_z;
@@ -254,7 +243,7 @@ int main(int argc, char **argv) {
   rclcpp::NodeOptions node_options;
 
   node_options.use_intra_process_comms(true);
-  auto node = std::make_shared<ArucoFilterPose>("pose_filter", node_options);
+  auto node = std::make_shared<FilterPose>("pose_filter", node_options);
 
   executor->add_node(node);
   executor->spin(); 

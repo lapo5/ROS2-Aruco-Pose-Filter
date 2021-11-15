@@ -1,6 +1,5 @@
 pose_filter:
   ros__parameters:
-
     filter_rate: 30.0
     
     butterworth_filter:

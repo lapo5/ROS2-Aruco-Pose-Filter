@@ -96,7 +96,7 @@ public:
         std::bind(&FilterPose::publish_filtering, this));
     }
     
-    std::cout << "Pose Filter Start" << std::endl;
+    std::cout << "[Aruco Pose Filter] Start" << std::endl;
   }
 
 private:

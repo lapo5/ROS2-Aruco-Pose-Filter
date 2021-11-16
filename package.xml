@@ -5,9 +5,9 @@
   <version>0.0.0</version>
   <description>Pose Filter for a TransformStamped</description>
   <maintainer email="marco.lapolla5@gmail.com">Marco Lapolla</maintainer>
-  <license>TODO: License declaration</license>
+  <license>BSD</license>
 
-  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>ament_cmake</depend>
 
   <depend>Eigen3</depend>
   <depend>tf2_ros</depend>

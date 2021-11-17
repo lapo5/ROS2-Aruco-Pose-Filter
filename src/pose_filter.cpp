@@ -4,6 +4,7 @@
 #include <string>
 #include <thread>
 #include <eigen3/Eigen/Dense>
+#include <signal.h>
 
 #include <rclcpp/rclcpp.hpp>
 #include <tf2/exceptions.h>
@@ -17,8 +18,6 @@
 #include <std_msgs/msg/bool.hpp>
 
 #include "Iir.h"
-
-#include <signal.h>
 
 using namespace std::chrono_literals;
 

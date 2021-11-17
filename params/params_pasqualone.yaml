@@ -18,7 +18,7 @@ pose_filter:
       aruco_presence_prefix: /target_tracking/camera_to_marker_presence/marker_
 
     frames: 
-      camera: wrist_camera_link
+      camera: parking_camera_link
       stable_link_prefix: filtered_marker_
 
 

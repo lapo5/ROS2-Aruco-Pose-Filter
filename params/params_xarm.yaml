@@ -1,13 +1,11 @@
 pose_filter:
   ros__parameters:
-    filter_rate: 30.0
     
     butterworth_filter:
       sampling_rate: 10.0
       cutoff_frequency: 1.0
 
-    median_filter:
-      use_median: False
+    slerp_filter:
       n_samples: 30
 
     publishers:

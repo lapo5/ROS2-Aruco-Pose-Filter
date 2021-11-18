@@ -122,14 +122,12 @@ private:
       Eigen::Quaterniond q_temp;
       Eigen::Quaterniond q_res;
 
-      int current_measure = counter;
+      int current_measure = (counter + 1) % N_measures;
       q_res = Eigen::Quaterniond(last_N_measures_rw[current_measure], last_N_measures_rx[current_measure],
               last_N_measures_ry[current_measure], last_N_measures_rz[current_measure]);
 
-      for(int i = 1; i < N_measures; i++){
-          current_measure = (counter - i) % N_measures;
-          if (current_measure < 0)
-            current_measure = current_measure + N_measures;
+      for(int i = 0; i < N_measures - 1; i++){
+          current_measure = (counter + i + 2) % N_measures;
 
           q_temp = Eigen::Quaterniond(last_N_measures_rw[current_measure], last_N_measures_rx[current_measure],
               last_N_measures_ry[current_measure], last_N_measures_rz[current_measure]);

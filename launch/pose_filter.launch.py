@@ -32,5 +32,16 @@ def generate_launch_description():
                     "stderr": "screen",
             },
             parameters=[params, {'marker_id': '69'}],
+        ),
+
+        Node(
+            package='aruco_pose_filter',
+            executable='pose_filter',
+            name='pose_filter',
+            output={
+                    "stdout": "screen",
+                    "stderr": "screen",
+            },
+            parameters=[params, {'marker_id': '0'}],
         )
 ])

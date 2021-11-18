@@ -7,7 +7,7 @@ pose_filter:
       cutoff_frequency: 1.0
 
     median_filter:
-      use_median: True
+      use_median: False
       n_samples: 30
 
     publishers:

@@ -166,38 +166,47 @@ private:
 
 
   void publish_filtering(){
-    // if(use_median and publish_data){
-    //   TransformStamped filtered_pose;
-    //   filtered_pose.header.stamp = this->get_clock()->now();
-    //   filtered_pose.header.frame_id = camera_link_frame;
-    //   filtered_pose.child_frame_id = stable_link_frame_;
+    if(use_median and publish_data){
+        TransformStamped filtered_pose;
+        filtered_pose.header.stamp = this->get_clock()->now();
+        filtered_pose.header.frame_id = camera_link_frame;
+        filtered_pose.child_frame_id = stable_link_frame_;
 
-    //   auto m = last_N_measures_x.begin() + last_N_measures_x.size()/2;
-    //   std::nth_element(last_N_measures_x.begin(), m, last_N_measures_x.end());
-    //   filtered_pose.transform.translation.x =  filters[0].filter(last_N_measures_x[last_N_measures_x.size()/2]);
+        auto m = last_N_measures_x.begin() + last_N_measures_x.size()/2;
+        std::nth_element(last_N_measures_x.begin(), m, last_N_measures_x.end());
+        filtered_pose.transform.translation.x =  filters[0].filter(last_N_measures_x[last_N_measures_x.size()/2]);
 
-    //   std::nth_element(last_N_measures_y.begin(), m, last_N_measures_y.end());
-    //   filtered_pose.transform.translation.y =  filters[1].filter(last_N_measures_y[last_N_measures_y.size()/2]);
+        std::nth_element(last_N_measures_y.begin(), m, last_N_measures_y.end());
+        filtered_pose.transform.translation.y =  filters[1].filter(last_N_measures_y[last_N_measures_y.size()/2]);
 
-    //   std::nth_element(last_N_measures_z.begin(), m, last_N_measures_z.end());
-    //   filtered_pose.transform.translation.z =  filters[2].filter(last_N_measures_z[last_N_measures_z.size()/2]);
+        std::nth_element(last_N_measures_z.begin(), m, last_N_measures_z.end());
+        filtered_pose.transform.translation.z =  filters[2].filter(last_N_measures_z[last_N_measures_z.size()/2]);
+        Eigen::Quaterniond q_temp;
+        Eigen::Quaterniond q_res;
 
-    //   std::nth_element(last_N_measures_rx.begin(), m, last_N_measures_rx.end());
-    //   filtered_pose.transform.rotation.x =  filters[3].filter(last_N_measures_rx[last_N_measures_rx.size()/2]);
+        int current_measure = counter;
+        q_res = Eigen::Quaterniond(last_N_measures_rw[current_measure], last_N_measures_rx[current_measure],
+                last_N_measures_ry[current_measure], last_N_measures_rz[current_measure]);
 
-    //   std::nth_element(last_N_measures_ry.begin(), m, last_N_measures_ry.end());
-    //   filtered_pose.transform.rotation.y =  filters[4].filter(last_N_measures_ry[last_N_measures_ry.size()/2]);
+        for(int i = 1; i < N_measures; i++){
+            current_measure = (counter - i) % N_measures;
+            if (current_measure < 0)
+            current_measure = current_measure + N_measures;
 
-    //   std::nth_element(last_N_measures_rz.begin(), m, last_N_measures_rz.end());
-    //   filtered_pose.transform.rotation.z =  filters[5].filter(last_N_measures_rz[last_N_measures_rz.size()/2]);
+            q_temp = Eigen::Quaterniond(last_N_measures_rw[current_measure], last_N_measures_rx[current_measure],
+                last_N_measures_ry[current_measure], last_N_measures_rz[current_measure]);
 
-    //   std::nth_element(last_N_measures_rw.begin(), m, last_N_measures_rw.end());
-    //   filtered_pose.transform.rotation.w =  filters[6].filter(last_N_measures_rw[last_N_measures_rw.size()/2]);
-    
-    //   pose_filter_pub_->publish(filtered_pose);
+            q_res = q_res.slerp(0.5, q_temp);
+        }
+        
+        filtered_pose.transform.rotation.x =  q_res.x();
+        filtered_pose.transform.rotation.y =  q_res.y();
+        filtered_pose.transform.rotation.z =  q_res.z();
+        filtered_pose.transform.rotation.w =  q_res.w();
+        pose_filter_pub_->publish(filtered_pose);
 
-    //   tf_broadcaster_->sendTransform(filtered_pose);
-    // }
+        tf_broadcaster_->sendTransform(filtered_pose);
+    }
     
   }
 

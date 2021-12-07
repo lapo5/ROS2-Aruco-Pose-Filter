@@ -24,13 +24,12 @@ public:
     FilterPose(const std::string node_name, rclcpp::NodeOptions options)
     : Node(node_name, options)
     {
-        pose_raw_topic_ = this->declare_parameter("subscribers.aruco_pose_raw_measures_prefix", "/target_tracking/camera_to_marker_transform/marker_");
-        pose_presence_topic_ = this->declare_parameter("subscribers.aruco_presence_prefix", "/target_tracking/camera_to_marker_presence/marker_");
-        pose_filter_topic_ = this->declare_parameter("publishers.aruco_pose_filter_measures_prefix", "/target_tracking/camera_to_marker_transform/filter/marker_");
+        pose_raw_topic_ = this->declare_parameter("subscribers.aruco_pose_raw_measures_prefix", "/aruco_pose/marker_");
+        pose_presence_topic_ = this->declare_parameter("subscribers.aruco_presence_prefix", "/aruco_presence/marker_");
+        pose_filter_topic_ = this->declare_parameter("publishers.aruco_pose_filter_measures_prefix", "/aruco_pose/filter/marker_");
 
-        camera_link_frame = this->declare_parameter("frames.camera", "wrist_camera_link");
+        camera_link_frame = this->declare_parameter("frames.camera", "camera_link");
         stable_link_frame_ = this->declare_parameter("frames.stable_link_prefix", "stable_link_");
-
 
         marker_id_ = this->declare_parameter("marker_id", "0");
         std::cout << "[Aruco Pose Filter] Marker_id: " << marker_id_ << std::endl;
@@ -71,7 +70,7 @@ public:
         presence_sub_ = this->create_subscription<std_msgs::msg::Bool>(pose_presence_topic_, 1, 
             std::bind(&FilterPose::pose_presence_callback_, this, std::placeholders::_1));
 
-        std::cout << "[Aruco Pose Filter] Start" << std::endl;
+        std::cout << "[Aruco Pose Filter] Node Start" << std::endl;
     }
 
 private:
@@ -141,7 +140,7 @@ private:
     std::string pose_presence_topic_;
     std::string pose_filter_topic_;
 
-    std::string camera_link_frame = "wrist_camera_link";
+    std::string camera_link_frame = "camera_link";
     std::string stable_link_frame_ = "stable_link";
     std::string marker_id_ = "0";
 
